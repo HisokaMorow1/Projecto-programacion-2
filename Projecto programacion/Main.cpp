@@ -15,19 +15,19 @@
 #define LARGOESCALADO MAXLARGO/20*/
 
 void moveBall();
-void p1Move();
-void p2Move();
+void p1Move(ALLEGRO_EVENT ev);
+void p2Move(ALLEGRO_EVENT ev);
 void startNew();
 void checkWin();
 void setupGame();
 void mapa();
 void dibujamapa();
-ALLEGRO_BITMAP *buffer;
+ALLEGRO_BITMAP* buffer;
 ALLEGRO_EVENT_QUEUE* event_queue = NULL;
 ALLEGRO_TIMER* timer = NULL;
 char mapita[MAXANCHO][MAXLARGO];
-ALLEGRO_BITMAP *bloque;
-ALLEGRO_BITMAP *bloquereal;
+ALLEGRO_BITMAP* bloque;
+ALLEGRO_BITMAP* bloquereal;
 int main()
 {
     al_init();
@@ -38,13 +38,17 @@ int main()
     mapa();
     dibujamapa();
     event_queue = al_create_event_queue();
-    timer = al_create_event_timer(1.0 / FPS);
+    timer = al_create_timer(1.0 / FPS);
     al_register_event_source(event_queue, al_get_keyboard_event_source());
-    al_register_event_source(event_queue, al_get_timer_event_souerce(timer));
-    while (!key[KEY_ESC])
+    al_register_event_source(event_queue, al_get_timer_event_source(timer));
+
+    ALLEGRO_EVENT ev;
+
+    while (!ev.type != ALLEGRO_KEY_ESCAPE)
     {
-        p1Move();
-        p2Move();
+        al_wait_for_event(event_queue, &ev);
+        p1Move(ev);
+        p2Move(ev);
         moveBall();
         checkWin();
     }
@@ -131,68 +135,65 @@ void moveBall()
 
     }
 
-    acquire_screen();
-    circlefill(buffer, ball_tempX, ball_tempY, 5, makecol(0, 0, 0));
-    circlefill(buffer, ball_x, ball_y, 5, makecol(128, 255, 0));
-    draw_sprite(screen, buffer, 0, 0);
-    release_screen();
 
-    rest(5);
+    al_draw_filled_circle(ball_tempX, ball_tempY, 5, al_map_rgb(0, 0, 0));
+    al_draw_filled_circle(ball_x, ball_y, 5, al_map_rgb(128, 255, 0));
+    al_draw_bitmap(buffer, 0, 0, 0);
+    al_flip_display();
+
+    al_rest(5);
 
 }
 
-void p1Move()
+void p1Move(ALLEGRO_EVENT ev)
 {
 
     p1_tempY = p1_y;
 
-    if (key[KEY_W] && p1_y > 0) {
+    if (ev.type == ALLEGRO_KEY_W && p1_y > 0) {
 
         --p1_y;
 
     }
-    else if (key[KEY_S] && p1_y < 420) {
+    else if (ev.type == ALLEGRO_KEY_S && p1_y < 420) {
 
         ++p1_y;
 
     }
 
-    acquire_screen();
-    rectfill(buffer, p1_tempX, p1_tempY, p1_tempX + 10, p1_tempY + 60, makecol(0, 0, 0));
-    rectfill(buffer, p1_x, p1_y, p1_x + 10, p1_y + 60, makecol(0, 0, 255));
-    release_screen();
+
+    al_draw_filled_rectangle(p1_tempX, p1_tempY, p1_tempX + 10, p1_tempY + 60, al_map_rgb(0, 0, 0));
+    al_draw_filled_rectangle(p1_x, p1_y, p1_x + 10, p1_y + 60, al_map_rgb(0, 0, 255));
+    al_flip_display();
 
 }
 
-void p2Move()
+void p2Move(ALLEGRO_EVENT ev)
 {
 
     p2_tempY = p2_y;
 
-    if (key[KEY_UP] && p2_y > 0) {
+    if (ev.type == ALLEGRO_KEY_UP && p2_y > 0) {
 
         --p2_y;
 
     }
-    else if (key[KEY_DOWN] && p2_y < 420) {
+    else if (ev.type == ALLEGRO_KEY_DOWN && p2_y < 420) {
 
         ++p2_y;
 
     }
 
-    acquire_screen();
-    rectfill(buffer, p2_tempX, p2_tempY, p2_tempX + 10, p2_tempY + 60, makecol(0, 0, 0));
-    rectfill(buffer, p2_x, p2_y, p2_x + 10, p2_y + 60, makecol(0, 0, 255));
-    release_screen();
+    al_draw_filled_rectangle(p2_tempX, p2_tempY, p2_tempX + 10, p2_tempY + 60, al_map_rgb(0, 0, 0));
+    al_draw_filled_rectangle(p2_x, p2_y, p2_x + 10, p2_y + 60, al_map_rgb(0, 0, 255));
+    al_flip_display();
 
 }
 
 void startNew()
 {
-
-    clear_keybuf();
-    readkey();
-    clear_to_color(buffer, makecol(0, 0, 0));
+    
+    al_clear_to_color(al_map_rgb(0, 0, 0));
     ball_x = 320;
     ball_y = 240;
 
@@ -206,13 +207,17 @@ void startNew()
 
 void checkWin()
 {
-
-    if (ball_x < p1_x) {
-        textout_ex(screen, font, "Player 2 Wins!", 320, 240, makecol(255, 0, 0), makecol(0, 0, 0));
+    int i, j;
+    if (ball_x < p1_x) 
+    {
+        al_draw_textf(font,"Player 2 Wins!", 320, 240, al_map_rgb(255, 0, 0), al_map_rgb(0, 0, 0));
+        al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", ranking[i].nombre);
         startNew();
     }
-    else if (ball_x > p2_x) {
-        textout_ex(screen, font, "Player 1 Wins!", 320, 240, makecol(255, 0, 0), makecol(0, 0, 0));
+    else if (ball_x > p2_x) 
+    {
+        al_draw_textf(font, "Player 1 Wins!", 320, 240, al_map_rgb(255, 0, 0), al_map_rgb(0, 0, 0));
+        al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", ranking[i].nombre);
         startNew();
     }
 
@@ -220,13 +225,11 @@ void checkWin()
 
 void setupGame()
 {
-
-    acquire_screen();
-    rectfill(buffer, p1_x, p1_y, p1_x + 10, p1_y + 60, makecol(0, 0, 255));
-    rectfill(buffer, p2_x, p2_y, p2_x + 10, p2_y + 60, makecol(0, 0, 255));
-    circlefill(buffer, ball_x, ball_y, 5, makecol(128, 255, 0));
-    draw_sprite(screen, buffer, 0, 0);
-    release_screen();
+    al_flip_display();
+    al_draw_filled_rectangle(p1_x, p1_y, p1_x + 10, p1_y + 60, al_map_rgb(0, 0, 255));
+    al_draw_filled_rectangle(p2_x, p2_y, p2_x + 10, p2_y + 60, al_map_rgb(0, 0, 255));
+    al_draw_filled_circle(ball_x, ball_y, 5, al_map_rgb(128, 255, 0));
+    al_flip_display();
 
     time(&secs);
     srand((unsigned int)secs);
@@ -256,18 +259,15 @@ void mapa()
 void dibujamapa()
 {
     int i, j;
-    bloque = load_bitmap("bloque.bmp", NULL);
-    bloquereal = create_bitmap(20, 20);
-    blit(bloque, bloquereal, 0, 0, 20, 20, 20, 20);
+    bloque = al_load_bitmap("bloque.bmp");
+    bloquereal = al_create_bitmap(20, 20);
     for (i = 0; i < 32; i++)
     {
         for (j = 0; j < 24; j++)
         {
             if (mapita[i][j] == 'x')
             {
-                draw_sprite(buffer, bloquereal, 20 * i, 20 * j);
-                /*blit(bloque,buffer,0,0,i*20,j*20,20,20);*/
-                /*rectfill(buffer,i*20,j*20, (i*20)+20,(j*20)+20,3);*/
+                al_draw_bitmap(bloque, 20 * j, 20 * i, 0);
             }
         }
     }
