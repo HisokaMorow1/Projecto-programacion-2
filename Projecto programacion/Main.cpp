@@ -23,6 +23,7 @@ void setupGame();
 void mapa();
 void dibujamapa();
 ALLEGRO_BITMAP* buffer;
+ALLEGRO_FONT* font;
 ALLEGRO_EVENT_QUEUE* event_queue = NULL;
 ALLEGRO_TIMER* timer = NULL;
 char mapita[MAXANCHO][MAXLARGO];
@@ -33,6 +34,7 @@ int main()
     al_init();
     al_install_keyboard();
     buffer = al_create_bitmap(640, 480);
+    al_init_font_addon();
     const int FPS = 60;
     setupGame();
     mapa();
@@ -207,16 +209,17 @@ void startNew()
 
 void checkWin()
 {
-    int i, j;
+    int i, j, ranking;
+    font = al_load_ttf_font(("Memories.ttf"),14,0);
     if (ball_x < p1_x) 
     {
-        al_draw_textf(font,"Player 2 Wins!", 320, 240, al_map_rgb(255, 0, 0), al_map_rgb(0, 0, 0));
+        al_draw_textf(font, al_map_rgb(255, 0, 0), 320, 240,0, "Player 2 Wins!");
         al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", ranking[i].nombre);
         startNew();
     }
     else if (ball_x > p2_x) 
     {
-        al_draw_textf(font, "Player 1 Wins!", 320, 240, al_map_rgb(255, 0, 0), al_map_rgb(0, 0, 0));
+        al_draw_textf(font,al_map_rgb(255, 0, 0), 320, 240, 0,"Player 1 Wins!");
         al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", ranking[i].nombre);
         startNew();
     }
