@@ -1,8 +1,14 @@
-#include <allegro.h>
-#include <stdlib.h>
+#include "allegro5/allegro.h" 
+#include "allegro5/allegro_image.h" 
+#include "allegro5/allegro_native_dialog.h" 
+#include <allegro5/allegro_font.h> 
+#include <allegro5/allegro_ttf.h> 
+#include <allegro5/allegro_primitives.h> 
+#include<stdio.h> 
+#include<stdlib.h> 
+#include<time.h> 
+#include<string.h>
 #include <stdio.h>
-#include <time.h>
-#include <string.h> 
 #define MAXANCHO 640
 #define MAXLARGO 480
 /*#define ANCHOESCALADO MAXANCHO/20
@@ -16,22 +22,25 @@ void checkWin();
 void setupGame();
 void mapa();
 void dibujamapa();
-BITMAP* buffer;
+ALLEGRO_BITMAP *buffer;
+ALLEGRO_EVENT_QUEUE* event_queue = NULL;
+ALLEGRO_TIMER* timer = NULL;
 char mapita[MAXANCHO][MAXLARGO];
-BITMAP* bloque;
-PALETTE paleta;
-BITMAP* bloquereal;
+ALLEGRO_BITMAP *bloque;
+ALLEGRO_BITMAP *bloquereal;
 int main()
 {
-    allegro_init();
-    install_keyboard();
-    set_color_depth(16);
-    set_gfx_mode(GFX_AUTODETECT, 640, 480, 0, 0);
-    buffer = create_bitmap(640, 480);
-
+    al_init();
+    al_install_keyboard();
+    buffer = al_create_bitmap(640, 480);
+    const int FPS = 60;
     setupGame();
     mapa();
     dibujamapa();
+    event_queue = al_create_event_queue();
+    timer = al_create_event_timer(1.0 / FPS);
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
+    al_register_event_source(event_queue, al_get_timer_event_souerce(timer));
     while (!key[KEY_ESC])
     {
         p1Move();
@@ -42,7 +51,6 @@ int main()
 
     return 0;
 }
-END_OF_MAIN();
 
 int ball_x = 320;
 int ball_y = 240;
