@@ -11,14 +11,25 @@
 #include <stdio.h>
 #define MAXANCHO 640
 #define MAXLARGO 480
+#define largo 10
+#define MAX 3
 /*#define ANCHOESCALADO MAXANCHO/20
 #define LARGOESCALADO MAXLARGO/20*/
+
+
+
+
+struct jugador
+{
+    char nombre[largo];
+    int puntaje;
+};
 
 void moveBall();
 void p1Move(ALLEGRO_EVENT ev);
 void p2Move(ALLEGRO_EVENT ev);
 void startNew();
-void checkWin();
+void checkWin(struct jugador jugadores[2]);
 void setupGame();
 void mapa();
 void dibujamapa();
@@ -31,6 +42,8 @@ ALLEGRO_BITMAP* bloque;
 ALLEGRO_BITMAP* bloquereal;
 int main()
 {
+   
+    struct jugador jugadores[2];
     al_init();
     al_install_keyboard();
     buffer = al_create_bitmap(640, 480);
@@ -44,16 +57,21 @@ int main()
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
-    ALLEGRO_EVENT ev;
+    printf("Jugador 1   :");
+    scanf("%s", jugadores[0].nombre);
+    printf("Jugador 2   :");
+    scanf("%s", jugadores[1].nombre);
 
-    while (!ev.type != ALLEGRO_KEY_ESCAPE)
-    {
-        al_wait_for_event(event_queue, &ev);
-        p1Move(ev);
-        p2Move(ev);
-        moveBall();
-        checkWin();
-    }
+    ALLEGRO_EVENT ev;    
+        while (ev.type != ALLEGRO_KEY_ESCAPE)
+        {
+            al_wait_for_event(event_queue, &ev);
+            p1Move(ev);
+            p2Move(ev);
+            moveBall();
+            checkWin(jugadores);
+        }
+        
 
     return 0;
 }
@@ -207,20 +225,21 @@ void startNew()
 
 }
 
-void checkWin()
+void checkWin(struct jugador jugadores[2])
 {
-    int i, j, ranking;
+    int i=100;
+    
     font = al_load_ttf_font(("Memories.ttf"),14,0);
     if (ball_x < p1_x) 
     {
-        al_draw_textf(font, al_map_rgb(255, 0, 0), 320, 240,0, "Player 2 Wins!");
-        al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", ranking[i].nombre);
+        al_draw_textf(font, al_map_rgb(255, 0, 0), 320, 240,0,"%s", "Player 1 Wins!" );
+        al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", jugadores[0].nombre);
         startNew();
     }
     else if (ball_x > p2_x) 
     {
-        al_draw_textf(font,al_map_rgb(255, 0, 0), 320, 240, 0,"Player 1 Wins!");
-        al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", ranking[i].nombre);
+        al_draw_textf(font,al_map_rgb(255, 0, 0), 320, 240, 0, "%s", "Player 2 Wins!");
+        al_draw_textf(font, al_map_rgb(255, 255, 255), 200, 200 + (i * 20), 0, "%s ", jugadores[1].nombre);
         startNew();
     }
 
@@ -242,7 +261,7 @@ void setupGame()
 
 void mapa()
 {
-    FILE* mapFile;
+    FILE *mapFile;
     int i, j;
     if ((mapFile = fopen("mapa.txt", "r")) == NULL)
     {
