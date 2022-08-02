@@ -25,10 +25,13 @@ void checkWin(struct jugador jugadores[2]);
 void setupGame();
 void mapa();
 void dibujamapa();
+/*void dibujabloque();*/
 char mapita[MAXANCHO][MAXLARGO];
 BITMAP *bmp;
 BITMAP *buffer;
 BITMAP *bloque;
+BITMAP *bloque2;
+
 
 
 int main()
@@ -43,8 +46,8 @@ int main()
     setupGame();
     mapa();
     dibujamapa();
-    strcpy(jugadores[0].nombre,"Duvan");
-    strcpy(jugadores[1].nombre,"Ignacio");
+    strcpy(jugadores[0].nombre,"Duvan gano");
+    strcpy(jugadores[1].nombre,"Ignacio gano");
     while( !key[KEY_ESC])
 	{
 	    p1Move();
@@ -69,10 +72,10 @@ int p1_y = 210;
 int p1_tempX = 20;
 int p1_tempY = 210;
 
-int p2_x = 600;
+int p2_x = 609;
 int p2_y = 210;
 
-int p2_tempX = 600;
+int p2_tempX = 609;
 int p2_tempY = 210;
 
 time_t secs;    
@@ -143,11 +146,11 @@ void p1Move()
  
     p1_tempY = p1_y;
  
-    if( key[KEY_W] && p1_y > 0){
+    if( key[KEY_W] && p1_y > 20){
      
         --p1_y;
               
-    } else if( key[KEY_S] && p1_y < 420){
+    } else if( key[KEY_S] && p1_y < 400){
      
         ++p1_y;
               
@@ -165,11 +168,11 @@ void p2Move()
  
     p2_tempY = p2_y;
  
-    if( key[KEY_UP] && p2_y > 0){
+    if( key[KEY_UP] && p2_y > 20){
      
         --p2_y;
               
-    } else if( key[KEY_DOWN] && p2_y < 420){
+    } else if( key[KEY_DOWN] && p2_y < 400){
      
         ++p2_y;
               
@@ -194,20 +197,19 @@ void startNew()
     p1_x = 20;
     p1_y = 210;
 
-    p2_x = 600;
+    p2_x = 609;
     p2_y = 210;
-
+    
+	dibujamapa();
 }    
 
 void checkWin(struct jugador jugadores[2])
 {
 
-    if ( ball_x < p1_x){
-        textout_ex( screen, font, "Player 2 Wins!", 320, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
+    if ( ball_x < 20){
         textout_ex( screen, font, jugadores[1].nombre, 320, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
         startNew();
-    } else if ( ball_x > p2_x){
-        textout_ex( screen, font, "0", 320, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
+    } else if ( ball_x > 612){
         textout_ex( screen, font, jugadores[0].nombre, 320, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
         startNew();
     }    
@@ -256,6 +258,7 @@ void dibujamapa()
 {
 	int i,j;
 	bloque = load_bitmap("bloque3.bmp",NULL);
+	bloque2 = load_bitmap("bloque2.bmp",NULL);
 	for(i = 0; i < MAXMALTO; i++)
 	{
 		for(j = 0; j < MAXMANCHO; j++)
@@ -263,11 +266,13 @@ void dibujamapa()
 			if (mapita[i][j]=='x')
 			{	
 				draw_sprite(buffer,bloque,20*j,20*i);
-				/*blit(bloque,buffer,0,0,i*20,j*20,20,20);
-				rectfill(buffer,i*20,j*20, (i*20)+20,(j*20)+20,3);*/
 			}
-		}
+			if(mapita[i][j]=='a')
+			{
+				draw_sprite(buffer,bloque2,20*j,20*i);
+			}
+		}	
+			
 	}
-	blit(buffer,screen,0,0,20,20,20,20);
-	rest(1000);
+		
 }
