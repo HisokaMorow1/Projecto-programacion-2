@@ -7,7 +7,25 @@
 #define MAXLARGO 480
 #define largo 10
 #define MAXMANCHO 32
-#define MAXMALTO 24
+#define MAXALTO 24
+#define N 10
+#define largoo 10
+
+// estructuras
+
+/*
+struct bloke
+{
+	int p1, p2;
+	bool destruido;
+};
+*/
+
+struct rank
+{
+	char nick[largoo];
+	int puntos;
+};
 
 struct jugador
 {
@@ -22,8 +40,12 @@ void startNew();
 void checkWin(struct jugador jugadores[2]);
 void setupGame();
 void mapa();
-void dibujamapa(BITMAP *bloque,BITMAP *bloque2);
+void dibujamapa();
 void bloqueduro();
+void leeranking(struct rank ranking[N]);
+void muestrarank(rank ranking[N]);
+void grabaranking(struct rank ranking[N]);
+
 char mapita[MAXANCHO][MAXLARGO];
 BITMAP *bmp;
 BITMAP *buffer;
@@ -34,10 +56,35 @@ BITMAP *fondo;
 BITMAP *fondo2;
 BITMAP *fondo3;
 BITMAP *fondo4;
+BITMAP *vacio;
+BITMAP *bloque3;
+BITMAP *bloque4;
+
+// variables globales
+
+int x=200;
+int y=100;
+
+int tempX=100;
+int tempY=100;
+
+int p1_x = 20;
+int p1_y = 210;
+
+int p1_tempX = 20;
+int p1_tempY = 210;
+
+int p2_x = 609;
+int p2_y = 210;
+
+int p2_tempX = 609;
+int p2_tempY = 210;
+	
+int dir=1;  
 
 int main()
 {	
-
+	struct rank ranking[N];
 	struct jugador jugadores[2];
     allegro_init();
     install_keyboard();
@@ -54,7 +101,7 @@ int main()
     bool salida = false;
     while(!salida)
     {
-    	if (mouse_x > 270 && mouse_x < 344 && mouse_y > 275 && mouse_y < 363)
+    	if (mouse_x > 270 && mouse_x < 344 && mouse_y > 275 && mouse_y < 363) //comenzar
     	{
     		blit(fondo2,buffer,0,0,0,0,640,480);
     		if (mouse_b & 1)
@@ -66,13 +113,17 @@ int main()
     			setupGame();
 			}
 		}
-		else if (mouse_x > 244 && mouse_x < 290 && mouse_y > 285 && mouse_y < 399)
+		else if (mouse_x > 244 && mouse_x < 290 && mouse_y > 285 && mouse_y < 399) //score
 		{
 			blit(fondo3,buffer,0,0,0,0,640,480);
     		if (mouse_b & 1)
     		{
     			salida = true;
+    			muestrarank(rank ranking[N]);
+    			ranking[N].nick;
+    			ranking[N].puntos;
     			return 0;
+    			
 			}
 		}
 		else if (mouse_x > 242 && mouse_x < 283 && mouse_y > 425 && mouse_y < 440)
@@ -90,117 +141,75 @@ int main()
 		masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);
 		blit(buffer,screen,0,0,0,0,640,480);
 	}
-    setupGame();
+    /*setupGame();*/
     mapa();
     bloque = load_bitmap("bloque3.bmp",NULL);
 	bloque2 = load_bitmap("bloque2.bmp",NULL);
-    dibujamapa(bloque,bloque2);
+	vacio = load_bitmap("f.bmp",NULL);
+	bloque3 = load_bitmap("color amarillo.bmp",NULL);
+	bloque4 = load_bitmap("colorverde.bmp",NULL);
+    dibujamapa();
     strcpy(jugadores[0].nombre,"Gano el Jugador 1");
     strcpy(jugadores[1].nombre,"Gano el Jugador 2");
+    
     while( !key[KEY_ESC])
 	{
-	    p1Move();
+		p1Move();
         p2Move();
-        moveBall();
         checkWin(jugadores);
+        moveBall();
+        bloqueduro();
     }    
+    
     limpiar();
     return 0;
 }
 END_OF_MAIN();
-
-int ball_x = 320;
-int ball_y = 240;
-
-int ball_tempX = 320;
-int ball_tempY = 240;
-
-int p1_x = 20;
-int p1_y = 210;
-
-int p1_tempX = 20;
-int p1_tempY = 210;
-
-int p2_x = 609;
-int p2_y = 210;
-
-int p2_tempX = 609;
-int p2_tempY = 210;
-
-time_t secs;    
-int dir;   
-void moveBall()
+ 
+void moveBall() //movimiento de la pelota
 {
-
-    ball_tempX = ball_x;
-    ball_tempY = ball_y;
-
-    if (dir == 1 && ball_x > 5 && ball_y > 25){
-     
-         if( ball_x == p1_x + 15 && ball_y >= p1_y && ball_y <= p1_y + 60){
-                  dir = rand()% 2 + 3;
-         }else{    
-                 --ball_x;
-                 --ball_y;
-         }    
-              
-    } else if (dir == 2 && ball_x > 5 && ball_y < 455){
-
-         if( ball_x == p1_x + 15 && ball_y >= p1_y && ball_y <= p1_y + 60){
-                  dir = rand()% 2 + 3;
-         }else{    
-                 --ball_x;
-                 ++ball_y;
-         }
-
-    } else if (dir == 3 && ball_x < 635 && ball_y > 25){
-
-         if( ball_x + 5 == p2_x && ball_y >= p2_y && ball_y <= p2_y + 60){
-                  dir = rand()% 2 + 1;
-         }else{    
-                 ++ball_x;
-                 --ball_y;
-         }
-
-    } else if (dir == 4 && ball_x < 635 && ball_y < 455){
-
-         if( ball_x + 5 == p2_x && ball_y >= p2_y && ball_y <= p2_y + 60){
-                  dir = rand()% 2 + 1;
-         }else{    
-                 ++ball_x;
-                 ++ball_y;
-         }
-
-    } else { 
-
-        if (dir == 1 || dir == 3)    ++dir;
-        else if (dir == 2 || dir == 4)    --dir;
-
-    }
-	int auxX,auxY;
-	auxX=ball_x/20;
-	auxY=ball_y/20;
-	if(mapita[auxY][auxX] =='a')
+	tempX=x;
+	tempY=y;
+	
+	if (dir == 1 && x!=30 && y!=30)
 	{
-		mapita[auxY][auxX] = ' ';	
-		dibujamapa(bloque,bloque2);
-	}   
-    
-    acquire_screen();
-    circlefill ( buffer, ball_tempX, ball_tempY, 5, makecol( 0, 0, 0));
-    circlefill ( buffer, ball_x, ball_y, 5, makecol( 128, 255, 0));
-    draw_sprite( screen, buffer, 0, 0);
-    release_screen();
-    
-    rest(1);
+		--x;
+		--y;
+	}
+	else if (dir == 2 && x !=30 && y !=450)
+	{
+		--x;
+		++y;
+	}
+	else if(dir == 3 && x !=610 && y !=30)
+	{
+		++x;
+		--y;
+	}
+	else if(dir == 4 && x !=610 && y != 450)
+	{
+		++x;
+		++y;
+	}
+	else 
+	{
+		dir = rand()%4+1;
+	}
+	
+	acquire_screen();
+	circlefill ( buffer, tempX, tempY, 5, makecol( 0, 0, 0));
+	draw_sprite(screen,buffer,0,0);
+	circlefill(screen,tempX,tempY,5,makecol(128,225,0));
+	dibujamapa();
+	release_screen();
+	rest(10);
 
 }    
 
-void p1Move()
+void p1Move() //jugador 1
 {
- 
-    p1_tempY = p1_y;
- 
+    p1_tempY=p1_y;
+    
     if( key[KEY_W] && p1_y > 20){
      
         --p1_y;
@@ -218,9 +227,9 @@ void p1Move()
           
 }  
 
-void p2Move()
+void p2Move() //jugador 2
 {
- 
+	
     p2_tempY = p2_y;
  
     if( key[KEY_UP] && p2_y > 20){
@@ -240,54 +249,52 @@ void p2Move()
           
 }    
 
-void startNew()
+void startNew() //juego nuevo
 {
-
     clear_keybuf();
     readkey();
     clear_to_color( buffer, makecol( 0, 0, 0));
-    ball_x = 320;
-    ball_y = 240;
-
-    p1_x = 20;
-    p1_y = 210;
-
-    p2_x = 609;
-    p2_y = 210;
+    x = 320;
+    y = 240;
     
-	dibujamapa(bloque,bloque2);
+    p1_x=20;
+    p1_y=210;
+    
+    p2_x=609;
+    p2_y=210;
+
+    dibujamapa();
 }    
 
-void checkWin(struct jugador jugadores[2])
+void checkWin(struct jugador jugadores[2]) //ver quien gano
 {
 
-    if ( ball_x < 20){
+    if ( x < 0){
         textout_ex( screen, font, jugadores[1].nombre, 300, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
         startNew();
-    } else if ( ball_x > 612){
+    } else if ( x > 640){
         textout_ex( screen, font, jugadores[0].nombre, 300, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
         startNew();
     }    
    
 }    
 
-void setupGame()
+void setupGame() //modo de juego
 {
- 
     acquire_screen();
     rectfill( buffer, p1_x, p1_y, p1_x + 10, p1_y + 60, makecol ( 0, 0, 255));
-    rectfill( buffer, p2_x, p2_y, p2_x + 10, p2_y + 60, makecol ( 0, 0, 255));  
-    circlefill ( buffer, ball_x, ball_y, 5, makecol( 128, 255, 0));
+    rectfill( buffer, p2_x, p2_y, p2_x + 10, p2_y + 60, makecol ( 0, 0, 255)); 
+    circlefill( buffer, x, y, 5, makecol( 128, 225, 0));
     draw_sprite( screen, buffer, 0, 0);
     release_screen();
     
-    time(&secs);
-    srand( (unsigned int)secs);
+   /* time(&secs);
+   /* srand( (unsigned int)secs);*/
     dir = rand() % 4 + 1;
             
 }    
 
-void mapa()
+void mapa() //carga archivo del mapa en txt
 {
 	FILE *mapFile;
 	int i, j;
@@ -297,22 +304,21 @@ void mapa()
 		printf("Error al abrir archivo");
 		return;
 	}
-	for (i = 0; i < MAXMALTO; i++)
+	for (i = 0; i < MAXALTO; i++)
 	{
 		for (j = 0; j < MAXMANCHO; j++)
   		{
 		  	fscanf(mapFile, "%c", &mapita[i][j]);
 		}
-		
 		fscanf(mapFile, "%c", &aux);
 	}
 	fclose(mapFile);
 }
 
-void dibujamapa(BITMAP *bloque,BITMAP *bloque2)
+void dibujamapa() //dibuja los bloques
 {
 	int i,j;
-	for(i = 0; i < MAXMALTO; i++)
+	for(i = 0; i < MAXALTO; i++)
 	{
 		for(j = 0; j < MAXMANCHO; j++)
 		{
@@ -324,11 +330,99 @@ void dibujamapa(BITMAP *bloque,BITMAP *bloque2)
 			{
 				draw_sprite(buffer,bloque2,20*j,20*i);
 			}
+			if(mapita[i][j]=='f')
+			{
+				draw_sprite(buffer,vacio,20*j,20*i);
+			}
+			if(mapita[i][j]=='c')
+			{
+				draw_sprite(buffer,bloque3,20*j,20*i);
+			}
+			if(mapita[i][j]=='s')
+			{
+				draw_sprite(buffer,bloque4,20*j,20*i);
+			}
 		}	
 			
 	}
 		
 }
+
+void bloqueduro() //aqui se elimina los bloques
+{
+	int posy=tempY/20;
+	int posx=tempX/20;
+ 	if(mapita[posy][posx]=='a')
+ 	{
+ 		mapita[posy][posx]='f';
+	}
+	if(mapita[posy][posx]=='c')
+ 	{
+ 		mapita[posy][posx]='f';
+	}
+	if(mapita[posy][posx]=='s')
+ 	{
+ 		mapita[posy][posx]='f';
+	}
+
+ }
+ 
+void leeranking(struct rank ranking[N])
+{
+	FILE *ranki;
+	int *Nreal;
+	*Nreal=0;
+	if((ranki = fopen("rank.txt","r"))==NULL)
+	{
+		printf("Error al abrir el archivo");
+		return;
+	}
+	while(!feof(ranki))
+	{
+		fscanf(ranki,"%s",&ranking[*Nreal].nick);
+		fscanf(ranki,"%d",&ranking[*Nreal].puntos);
+		(*Nreal)++;
+	}
+	fclose(ranki);
+} 
+
+void muestrarank(rank ranking[N])
+{
+	int Nreal,i;
+	for(i=0;i<Nreal;i++)
+	{
+		char puntaje[20];
+		itoa(ranking[i].puntos,puntaje,10);
+		textout_ex( screen, font, ranking[i].nick, 350, 290, makecol( 255, 0, 0), makecol( 0, 0, 0));
+		textout_ex( screen, font, puntaje, 300, 250, makecol( 255, 0, 0), makecol( 0, 0, 0));  
+		/*printf("%s %d\t",ranking[i].nick,ranking[i].puntos);*/
+		printf("\n");
+	}
+}
+
+void grabaranking(struct rank ranking[N])
+{
+	int Nreal,i;
+	FILE *ranki;
+	if((ranki = fopen("rank.txt","w"))==NULL)
+	{
+		printf("Error al abrir el archivo");
+		return;
+	}
+	for(i=0;i<Nreal;i++)
+	{
+		if(i<Nreal-1)
+		{
+			fprintf(ranki,"%s %d\n",ranking[i].nick,ranking[i].puntos);
+		}
+		else 
+		{
+			fprintf(ranki,"%s %d",ranking[i].nick,ranking[i].puntos);
+		}
+	}
+	fclose(ranki);
+}
+
 
 void limpiar()
 {
@@ -338,5 +432,4 @@ void limpiar()
 	destroy_bitmap(fondo2);
 	destroy_bitmap(fondo3);
 	destroy_bitmap(fondo4);
-	
 }
