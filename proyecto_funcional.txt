@@ -62,9 +62,11 @@ BITMAP *fondo4;
 BITMAP *vacio;
 BITMAP *bloque3;
 BITMAP *bloque4;
+BITMAP *dificultad_menu;
 BITMAP *dificultad_facil;
 BITMAP *dificultad_media;
 BITMAP *dificultad_dificil;
+
 
 
 // variables globales
@@ -108,6 +110,7 @@ int main()
     dificultad_facil = load_bitmap("dificultad_facil.bmp",NULL);
     dificultad_media= load_bitmap("dificultad_media.bmp",NULL);
     dificultad_dificil = load_bitmap("dificultad_dificil.bmp",NULL);
+    dificultad_menu = load_bitmap("dificultad_menu.bmp",NULL);
 
     bool salida = false;
     bool salida2= false;
@@ -118,52 +121,55 @@ int main()
     		blit(fondo2,buffer,0,0,0,0,640,480);
     		if (mouse_b & 1)
     		{
-    			position_mouse(203,225);
+   				masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397); 						
+				blit(dificultad_menu,buffer,0,0,0,0,640,480); 
+				blit(buffer,screen,0,0,0,0,640,480);  
     			while(!salida2)
-    			{
-    				
-    				blit(dificultad_facil,buffer,0,0,0,0,640,480);
-    				blit(buffer,screen,0,0,0,0,640,480);
-    				masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);    				
-    				if(mouse_x > 210 && mouse_x < 260 && mouse_y > 151 && mouse_y < 180) //mapa 1
+    			{	
+    				if(mouse_x > 200 && mouse_x < 260 && mouse_y > 160 && mouse_y < 180) //mapa 1
     					{
     						blit(dificultad_facil,buffer,0,0,0,0,640,480);
-    						masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);
+    						masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);	
+    						blit(buffer,screen,0,0,0,0,640,480);  
     						if (mouse_b & 1)
     							{
+ 									clear(buffer);
     			  					position_mouse(641,481);
-    								masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);
+    		    					mapa_general(1);	  	
     								salida = true;
     								salida2 = true;
-    								mapa_general(1);
     							}
 						}
-					if(mouse_x > 203 && mouse_x < 280 && mouse_y > 225 && mouse_y < 250) //mapa 2
+					if(mouse_x > 200 && mouse_x < 280 && mouse_y > 225 && mouse_y < 240) //mapa 2
     					{
     						blit(dificultad_media,buffer,0,0,0,0,640,480);
+    						masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);
+    						blit(buffer,screen,0,0,0,0,640,480);  	
     						if (mouse_b & 1)
     							{
+    								clear(buffer);
     			  					position_mouse(641,481);
-    								masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);     								
+    			      				mapa_general(2);		
     								salida = true;
     								salida2 = true;
-    								mapa_general(2);
   			  					}
 						}
-					if(mouse_x > 204 && mouse_x < 270 && mouse_y > 282 && mouse_y < 306) //mapa 3
+					if(mouse_x > 204 && mouse_x < 285 && mouse_y > 285 && mouse_y < 305 ) //mapa 3
     					{
     						blit(dificultad_dificil,buffer,0,0,0,0,640,480);
+    						masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);
+    						blit(buffer,screen,0,0,0,0,640,480);  	
     						if (mouse_b & 1)
     							{
+    								clear(buffer);
     			  					position_mouse(641,481);
-    								masked_blit(mouse1,buffer,0,0,mouse_x,mouse_y,270,397);    					    								
+									mapa_general(3);					    								
     								salida = true;
     								salida2 = true;
-    								mapa_general(3);
     							}
 						}
-				}
-
+					
+				}	
    			}
    			
 		}
@@ -361,21 +367,25 @@ void mapa_general(int level)
 			if((mapFile = fopen("mapa.txt", "r")) == NULL)
 			{
 				printf("Error al abrir archivo");
-				return;
+				break;
 			}
+			break;
 		case 2:
 			if((mapFile = fopen("mapa2.txt", "r")) == NULL)
 				{
 					printf("Error al abrir archivo");
-					return;
+					break;
 				}
+				break;
 		case 3:
 			if((mapFile = fopen("mapa3.txt", "r")) == NULL)
 			{
 				printf("Error al abrir archivo");
-				return;
+				break;
 			}
+			break;
 	}
+	
 	for (i = 0; i < MAXALTO; i++)
 	{
 		for (j = 0; j < MAXMANCHO; j++)
@@ -427,14 +437,23 @@ void bloqueduro() //aqui se elimina los bloques
  	if(mapita[posy][posx]=='a')
  	{
  		mapita[posy][posx]='f';
+ 		dir = 2; 
+ 		--x;
+ 		++y;
 	}
 	if(mapita[posy][posx]=='c')
  	{
  		mapita[posy][posx]='f';
+ 		dir = 1;
+ 		--x;
+ 		--y;
 	}
 	if(mapita[posy][posx]=='s')
  	{
  		mapita[posy][posx]='f';
+ 		dir =3;
+ 		++x;
+ 		--y;
 	}
 
  }
@@ -504,6 +523,7 @@ void limpiar()
 	destroy_bitmap(fondo2);
 	destroy_bitmap(fondo3);
 	destroy_bitmap(fondo4);
+	destroy_bitmap(dificultad_menu);
 	destroy_bitmap(dificultad_facil);
 	destroy_bitmap(dificultad_media);
 	destroy_bitmap(dificultad_dificil);
