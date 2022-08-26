@@ -13,14 +13,6 @@
 
 // estructuras
 
-/*
-struct bloke
-{
-	int p1, p2;
-	bool destruido;
-};
-*/
-
 struct rank
 {
 	char nick[largoo];
@@ -32,6 +24,9 @@ struct jugador
     char nombre[largo];
     int puntaje;
 };
+
+//funciones
+
 void limpiar();
 void moveBall();
 void p1Move();
@@ -39,16 +34,12 @@ void p2Move();
 void startNew();
 void checkWin(struct jugador jugadores[2]);
 void setupGame();
-void mapa();
-void mapa2();
-void mapa3();
 void dibujamapa();
 void bloqueduro();
 void leeranking(struct rank ranking[N]);
 void muestrarank(rank ranking[N]);
 void grabaranking(struct rank ranking[N]);
 void mapa_general(int level);
-
 char mapita[MAXANCHO][MAXLARGO];
 BITMAP *bmp;
 BITMAP *buffer;
@@ -66,12 +57,12 @@ BITMAP *dificultad_menu;
 BITMAP *dificultad_facil;
 BITMAP *dificultad_media;
 BITMAP *dificultad_dificil;
-
+MIDI *musica1;
 
 
 // variables globales
 
-int x=200;
+int x=100;
 int y=100;
 
 int tempX=100;
@@ -98,10 +89,14 @@ int main()
     allegro_init();
     install_keyboard();
     install_mouse();
+    if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0)
+	{
+       allegro_message("Error: inicializando sistema de sonido\n%s\n", allegro_error);
+       return 1;
+    }
     set_color_depth(32);
     set_gfx_mode( GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0);
     buffer = create_bitmap(640,480);
-    
     mouse1 = load_bitmap("cursor.bmp",NULL);
     fondo = load_bitmap("inicio.bmp",NULL);
     fondo2 = load_bitmap("comenzar.bmp",NULL);
@@ -111,7 +106,8 @@ int main()
     dificultad_media= load_bitmap("dificultad_media.bmp",NULL);
     dificultad_dificil = load_bitmap("dificultad_dificil.bmp",NULL);
     dificultad_menu = load_bitmap("dificultad_menu.bmp",NULL);
-
+    musica1 = load_midi("musica1.midi"); //Cambiar musica xd
+    set_volume(230, 200);
     bool salida = false;
     bool salida2= false;
     while(!salida)
@@ -126,6 +122,7 @@ int main()
 				blit(buffer,screen,0,0,0,0,640,480);  
     			while(!salida2)
     			{	
+    				play_midi(musica1,1);
     				if(mouse_x > 200 && mouse_x < 260 && mouse_y > 160 && mouse_y < 180) //mapa 1
     					{
     						blit(dificultad_facil,buffer,0,0,0,0,640,480);
@@ -135,10 +132,13 @@ int main()
     							{
  									clear(buffer);
     			  					position_mouse(641,481);
-    		    					mapa_general(1);	  	
+    		    					mapa_general(1);	  
+									p1Move();
+									p2Move();	
     								salida = true;
     								salida2 = true;
     							}
+    						draw_sprite(screen,buffer,0,0);	
 						}
 					if(mouse_x > 200 && mouse_x < 280 && mouse_y > 225 && mouse_y < 240) //mapa 2
     					{
@@ -149,7 +149,9 @@ int main()
     							{
     								clear(buffer);
     			  					position_mouse(641,481);
-    			      				mapa_general(2);		
+    			      				mapa_general(2);
+									p1Move();		
+									p2Move();
     								salida = true;
     								salida2 = true;
   			  					}
@@ -163,17 +165,18 @@ int main()
     							{
     								clear(buffer);
     			  					position_mouse(641,481);
-									mapa_general(3);					    								
+									mapa_general(3);	
+									p1Move();	    
+									p2Move();								
     								salida = true;
     								salida2 = true;
     							}
-						}
-					
+    							
+						}	
+    				}					 
 				}	
    			}
    			
-		}
-		
 		else if (mouse_x > 244 && mouse_x < 290 && mouse_y > 285 && mouse_y < 399) //score
 		{
 			blit(fondo3,buffer,0,0,0,0,640,480);
@@ -211,7 +214,6 @@ int main()
     dibujamapa();
     strcpy(jugadores[0].nombre,"Gano el Jugador 1");
     strcpy(jugadores[1].nombre,"Gano el Jugador 2");
-    
     while( !key[KEY_ESC])
 	{
 		p1Move();
@@ -220,7 +222,6 @@ int main()
         moveBall();
         bloqueduro();
     }    
-    
     limpiar();
     return 0;
 }
@@ -233,29 +234,56 @@ void moveBall() //movimiento de la pelota
 	
 	if (dir == 1 && x!=30 && y!=30)
 	{
-		--x;
-		--y;
+		if(x == p1_x +15 && y >= p1_y && y < p1_y +60)
+		{
+			dir=(rand()%2+3);
+		}
+		else
+		{
+			--x;
+			--y;
+		}
 	}
 	else if (dir == 2 && x !=30 && y !=450)
 	{
-		--x;
-		++y;
+		if(x == p1_x + 15 && y >= p1_y && y <= p1_y +60)
+		{
+			dir = rand()%2+3;
+		}
+		else
+		{
+			--x;
+			++y;
+		}
 	}
 	else if(dir == 3 && x !=610 && y !=30)
 	{
-		++x;
-		--y;
+		if(x + 5 == p2_x && y >= p2_y && y <= p2_y + 60)
+		{
+			dir = rand()%2+1;
+		}
+		{
+			++x;
+			--y;
+		}
 	}
 	else if(dir == 4 && x !=610 && y != 450)
 	{
-		++x;
-		++y;
+		if(x + 5 == p2_x && y >= p2_y && y <= p2_y + 60)
+		{
+			dir = rand()%2+1;
+		}
+		else
+		{
+			++x;
+			++y;
+		}
 	}
-	else 
+	else if (dir = rand()%4+1)
 	{
-		dir = rand()%4+1;
+		if(dir == 1 || dir == 3) dir++;
+		else if(dir == 2 || dir == 4) dir++;
 	}
-	
 	acquire_screen();
 	circlefill ( buffer, tempX, tempY, 5, makecol( 0, 0, 0));
 	draw_sprite(screen,buffer,0,0);
@@ -269,46 +297,38 @@ void moveBall() //movimiento de la pelota
 void p1Move() //jugador 1
 {
     p1_tempY=p1_y;
-    
-    if( key[KEY_W] && p1_y > 20){
-     
-        --p1_y;
-              
-    } else if( key[KEY_S] && p1_y < 400){
-     
-        ++p1_y;
-              
+    if( key[KEY_W] && p1_y > 20)
+	{ 
+        --p1_y;         
+    } 
+	else if( key[KEY_S] && p1_y < 400)
+	{ 
+        ++p1_y;         
     }     
-    
     acquire_screen();
     rectfill( buffer, p1_tempX, p1_tempY, p1_tempX + 10, p1_tempY + 60, makecol ( 0, 0, 0));
+    draw_sprite(screen,buffer,0,0);
     rectfill( buffer, p1_x, p1_y, p1_x + 10, p1_y + 60, makecol ( 0, 0, 255));
-    dibujamapa();
+    blit(buffer,screen,0,0,0,0,640,480); 
     release_screen();
-          
 }  
 
 void p2Move() //jugador 2
 {
-	
     p2_tempY = p2_y;
- 
-    if( key[KEY_UP] && p2_y > 20){
-     
-        --p2_y;
-              
-    } else if( key[KEY_DOWN] && p2_y < 400){
-     
-        ++p2_y;
-              
+    if( key[KEY_UP] && p2_y > 20)
+	{ 
+        --p2_y;         
+    } 
+	else if( key[KEY_DOWN] && p2_y < 400)
+	{
+        ++p2_y;          
     }     
-    
     acquire_screen();
     rectfill( buffer, p2_tempX, p2_tempY, p2_tempX + 10, p2_tempY + 60, makecol ( 0, 0, 0));
     rectfill( buffer, p2_x, p2_y, p2_x + 10, p2_y + 60, makecol ( 0, 0, 255));
-    dibujamapa();
+    blit(buffer,screen,0,0,0,0,640,480);  
     release_screen();
-          
 }    
 
 void startNew() //juego nuevo
@@ -331,10 +351,12 @@ void startNew() //juego nuevo
 void checkWin(struct jugador jugadores[2]) //ver quien gano
 {
 
-    if ( x < 0){
+    if ( x < 0)
+	{
         textout_ex( screen, font, jugadores[1].nombre, 300, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
         startNew();
-    } else if ( x > 640){
+    } 
+	else if ( x > 640){
         textout_ex( screen, font, jugadores[0].nombre, 300, 240, makecol( 255, 0, 0), makecol( 0, 0, 0)); 
         startNew();
     }    
@@ -424,10 +446,8 @@ void dibujamapa() //dibuja los bloques
 			{
 				draw_sprite(buffer,bloque4,20*j,20*i);
 			}
-		}	
-			
+		}			
 	}
-		
 }
 
 void bloqueduro() //aqui se elimina los bloques
@@ -453,9 +473,8 @@ void bloqueduro() //aqui se elimina los bloques
  		mapita[posy][posx]='f';
  		dir =3;
  		++x;
- 		--y;
+ 		--y;			
 	}
-
  }
  
 void leeranking(struct rank ranking[N])
